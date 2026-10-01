@@ -1,10 +1,17 @@
-// Função para mover e exibir o teclado virtual logo abaixo do container pai desejado
+// Função robusta para exibir o teclado virtual de forma segura no telemóvel e PC
 function mostrarTecladoAbaixoDe(idElementoPai) {
     const estudio = document.getElementById('estudio-interativo');
     const elementoPai = document.getElementById(idElementoPai);
-    if (estudio && elementoPai) {
-        elementoPai.insertAdjacentElement('afterend', estudio);
+    
+    if (estudio) {
+        if (elementoPai) {
+            elementoPai.insertAdjacentElement('afterend', estudio);
+        } else {
+            // Fallback: se o elemento pai não existir, insere no final para nunca falhar
+            document.body.appendChild(estudio);
+        }
         estudio.classList.remove('oculto');
+        estudio.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 }
 
@@ -360,7 +367,7 @@ function iniciarTreinoEscala() {
     escalaAtualNotas = escalasMaiores[tomEscalaAtual] || [];
     passoEscalaIndex = 0;
     modoEscalaAtivo = true;
-    desafioAtualObj = null; 
+    if (typeof desafioAtualObj !== 'undefined') desafioAtualObj = null; 
     modoMusicaAtivo = false;
 
     divResultado.innerHTML = `<div class="badge-tom">🎓 Treino da Escala: ${tomEscalaAtual} Maior</div><br>` +
@@ -414,9 +421,6 @@ function construirAcordePorTom(tom, tipoAcorde) {
     });
 }
 
-const dicionarioAcordesUniversal = {
-    // Para cada tom, definimos as fórmulas dos graus
-};
 
 // ==========================================
 // 7. MODO MÚSICA INTERATIVO COM TRANSPOSIÇÃO COMPLETA
@@ -612,51 +616,15 @@ function processarNotaPressionada(notaCompleta, veioDoLooper = false) {
         }
         return; 
     }
-
-    // C) QUIZ ABRANGENTE
-    if (desafioAtualObj && !veioDoLooper) {
-        if (!notasPressionadasPeloAluno.includes(notaBase)) {
-            notasPressionadasPeloAluno.push(notaBase);
-        }
-
-        if (notasPressionadasPeloAluno.length === desafioAtualObj.notas.length) {
-            const acertou = desafioAtualObj.notas.every(n => notasPressionadasPeloAluno.includes(n)) &&
-                            notasPressionadasPeloAluno.every(n => desafioAtualObj.notas.includes(n));
-
-            if (acertou) {
-                pontos += timeAttackAtivo ? 30 : 25;
-                sequencia += 1;
-                if (spanPontos) spanPontos.textContent = pontos;
-                if (spanSequencia) spanSequencia.textContent = sequencia;
-                atualizarRecordeNoServidor(pontos);
-
-                if (errosPorAcorde[desafioAtualObj.nome] > 1) errosPorAcorde[desafioAtualObj.nome]--;
-
-                if (feedbackDesafio) {
-                    feedbackDesafio.innerHTML = `<div class="badge-tom">🎉 Acertaste!</div><br>Excelente! ${desafioAtualObj.nome}`;
-                }
-
-                if (!timeAttackAtivo) {
-                    setTimeout(ocultarTecladoEPauta, 1500);
-                } else {
-                    setTimeout(iniciarNovoDesafio, 1200);
-                }
-            } else {
-                sequencia = 0;
-                if (spanSequencia) spanSequencia.textContent = sequencia;
-                errosPorAcorde[desafioAtualObj.nome] += 2;
-
-                if (feedbackDesafio) {
-                    feedbackDesafio.innerHTML = `<div class="badge-tom">❌ Tenta de novo!</div><br>Incorreto para ${desafioAtualObj.nome}.`;
-                }
-                notasPressionadasPeloAluno = [];
-            }
-        }
-    }
 }
 
+// Suporte otimizado para clique e toque no telemóvel (pointerdown)
 document.querySelectorAll('.tecla').forEach(tecla => {
-    tecla.addEventListener('click', () => {
+    tecla.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
         processarNotaPressionada(tecla.getAttribute('data-nota'));
     });
 });
@@ -687,7 +655,7 @@ function registrarNotaMidi(nota) {
             if (modoMusicaAtivo) {
                 mostrarTecladoAbaixoDe('secao-progressoes');
             } else {
-                mostrarTecladoAbaixoDe('secao-quiz');
+                mostrarTecladoAbaixoDe('secao-looper');
             }
             bufferMidiSimultaneo.forEach(n => processarNotaPressionada(n));
             bufferMidiSimultaneo = [];
