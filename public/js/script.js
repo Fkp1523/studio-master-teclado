@@ -1,16 +1,13 @@
-// Função robusta para exibir o teclado virtual de forma segura no telemóvel e PC
+// Função robusta para exibir o teclado virtual e a pauta
 function mostrarTecladoAbaixoDe(idElementoPai) {
     const estudio = document.getElementById('estudio-interativo');
     const elementoPai = document.getElementById(idElementoPai);
     
     if (estudio) {
+        estudio.classList.remove('oculto');
         if (elementoPai) {
             elementoPai.insertAdjacentElement('afterend', estudio);
-        } else {
-            // Fallback: se o elemento pai não existir, insere no final para nunca falhar
-            document.body.appendChild(estudio);
         }
-        estudio.classList.remove('oculto');
         estudio.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 }
@@ -174,7 +171,58 @@ desenharPauta();
 
 
 // ==========================================
-// 3. LOOPER DE GRAVAÇÃO E REPRODUÇÃO
+// 3. TREINAMENTO PRÁTICO / QUIZ (SEÇÃO 1)
+// ==========================================
+let desafioAtualObj = null;
+let notasPressionadasPeloAluno = [];
+let pontos = 0;
+let sequencia = 0;
+let timeAttackAtivo = false;
+let errosPorAcorde = {};
+
+const btnNovoDesafio = document.getElementById('btn-novo-desafio');
+const feedbackDesafio = document.getElementById('feedback-desafio');
+const spanPontos = document.getElementById('pontos');
+const spanSequencia = document.getElementById('sequencia');
+const spanRecorde = document.getElementById('recorde');
+
+const bancoAcordesQuiz = [
+    { nome: "Tríade de Dó Maior (C)", notas: ["C", "E", "G"] },
+    { nome: "Tríade de Ré Maior (D)", notas: ["D", "F#", "A"] },
+    { nome: "Tríade de Mi Maior (E)", notas: ["E", "G#", "B"] },
+    { nome: "Tríade de Fá Maior (F)", notas: ["F", "A", "C"] },
+    { nome: "Tríade de Sol Maior (G)", notas: ["G", "B", "D"] },
+    { nome: "Tríade de Lá Maior (A)", notas: ["A", "C#", "E"] },
+    { nome: "Tríade de Si Maior (B)", notas: ["B", "D#", "F#"] },
+    { nome: "Tríade de Dó Menor (Cm)", notas: ["C", "D#", "G"] },
+    { nome: "Tríade de Ré Menor (Dm)", notas: ["D", "F", "A"] },
+    { nome: "Tríade de Mi Menor (Em)", notas: ["E", "G", "B"] },
+    { nome: "Tríade de Fá Menor (Fm)", notas: ["F", "G#", "C"] },
+    { nome: "Tríade de Sol Menor (Gm)", notas: ["G", "A#", "D"] },
+    { nome: "Tríade de Lá Menor (Am)", notas: ["A", "C", "E"] }
+];
+
+function iniciarNovoDesafio() {
+    mostrarTecladoAbaixoDe('secao-quiz');
+    modoEscalaAtivo = false;
+    modoMusicaAtivo = false;
+    
+    const indice = Math.floor(Math.random() * bancoAcordesQuiz.length);
+    desafioAtualObj = bancoAcordesQuiz[indice];
+    notasPressionadasPeloAluno = [];
+
+    if (feedbackDesafio) {
+        feedbackDesafio.innerHTML = `<div class="badge-tom">🎯 Desafio Ativo</div><br>Toca o acorde: <strong style="color:#22c55e; font-size:1.2rem;">${desafioAtualObj.nome}</strong>`;
+    }
+}
+
+if (btnNovoDesafio) {
+    btnNovoDesafio.addEventListener('click', iniciarNovoDesafio);
+}
+
+
+// ==========================================
+// 4. LOOPER DE GRAVAÇÃO E REPRODUÇÃO
 // ==========================================
 let isRecording = false;
 let recordedEvents = [];
@@ -248,7 +296,7 @@ if (btnStopLoop) {
 
 
 // ==========================================
-// 4. METRÓNOMO INTEGRADO
+// 5. METRÓNOMO INTEGRADO
 // ==========================================
 let metronomeTimer = null;
 let isMetronomeActive = false;
@@ -310,7 +358,7 @@ if (bpmSlider) {
 
 
 // ==========================================
-// 5. CAMPO HARMÓNICO & TREINO DE ESCALAS
+// 6. CAMPO HARMÓNICO & TREINO DE ESCALAS
 // ==========================================
 const camposHarmonicos = {
     "C":  ["C (I)", "Dm (ii)", "Em (iii)", "F (IV)", "G (V)", "Am (vi)", "Bdim (vii°)"],
@@ -367,7 +415,7 @@ function iniciarTreinoEscala() {
     escalaAtualNotas = escalasMaiores[tomEscalaAtual] || [];
     passoEscalaIndex = 0;
     modoEscalaAtivo = true;
-    if (typeof desafioAtualObj !== 'undefined') desafioAtualObj = null; 
+    desafioAtualObj = null; 
     modoMusicaAtivo = false;
 
     divResultado.innerHTML = `<div class="badge-tom">🎓 Treino da Escala: ${tomEscalaAtual} Maior</div><br>` +
@@ -390,16 +438,9 @@ if (btnReiniciarEscala) {
 
 
 // ==========================================
-// 6. DICIONÁRIO E BANCO DE ACORDES UNIVERSAL
+// 7. DICIONÁRIO E ACORDES UNIVERSAL
 // ==========================================
 const notasCromaticas = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-
-function transporNota(notaBase, semitons) {
-    let index = notasCromaticas.indexOf(notaBase);
-    if (index === -1) return notaBase;
-    let novoIndex = (index + semitons + 12) % 12;
-    return notasCromaticas[novoIndex];
-}
 
 function construirAcordePorTom(tom, tipoAcorde) {
     let raizIndex = notasCromaticas.indexOf(tom);
@@ -416,14 +457,13 @@ function construirAcordePorTom(tom, tipoAcorde) {
 
     let ints = intervalos[tipoAcorde] || intervalos["maior"];
     return ints.map(semitons => {
-        let notaNome = notasCromaticas[(raizIndex + semitons) % 12];
-        return notaNome;
+        return notasCromaticas[(raizIndex + semitons) % 12];
     });
 }
 
 
 // ==========================================
-// 7. MODO MÚSICA INTERATIVO COM TRANSPOSIÇÃO COMPLETA
+// 8. MODO MÚSICA INTERATIVO
 // ==========================================
 const modelosProgressao = {
     "pop": { nome: "Pop Ballad (I - vi - IV - V)", graus: [ {grau: "I", tipo: "maior", offset: 0}, {grau: "vi", tipo: "menor", offset: 9}, {grau: "IV", tipo: "maior", offset: 5}, {grau: "V", tipo: "maior", offset: 7} ] },
@@ -526,7 +566,7 @@ if (btnIniciarProg) {
 
 
 // ==========================================
-// 8. PROCESSAMENTO CENTRAL DE NOTAS & SUPORTE MIDI BLOCADO
+// 9. PROCESSAMENTO CENTRAL DE NOTAS & TECLADO
 // ==========================================
 function processarNotaPressionada(notaCompleta, veioDoLooper = false) {
     const notaBase = notaCompleta.replace(/[0-9]/g, ''); 
@@ -581,7 +621,7 @@ function processarNotaPressionada(notaCompleta, veioDoLooper = false) {
         setTimeout(() => teclaEl.classList.remove('ativa'), 200);
     }
 
-    // B) MODO MÚSICA (PROGRESSÕES EM QUALQUER TOM)
+    // B) MODO MÚSICA (PROGRESSÕES)
     if (modoMusicaAtivo && !veioDoLooper) {
         const acordeObjAlvo = progressaoAtivaAcordes[passoProgIndex];
         const notasEsperadasAlvo = acordeObjAlvo.notas;
@@ -616,9 +656,40 @@ function processarNotaPressionada(notaCompleta, veioDoLooper = false) {
         }
         return; 
     }
+
+    // C) QUIZ / TREINAMENTO PRÁTICO (SEÇÃO 1)
+    if (desafioAtualObj && !veioDoLooper) {
+        if (!notasPressionadasPeloAluno.includes(notaBase)) {
+            notasPressionadasPeloAluno.push(notaBase);
+        }
+
+        if (notasPressionadasPeloAluno.length === desafioAtualObj.notas.length) {
+            const acertou = desafioAtualObj.notas.every(n => notasPressionadasPeloAluno.includes(n)) &&
+                            notasPressionadasPeloAluno.every(n => desafioAtualObj.notas.includes(n));
+
+            if (acertou) {
+                pontos += 25;
+                sequencia += 1;
+                if (spanPontos) spanPontos.textContent = pontos;
+                if (spanSequencia) spanSequencia.textContent = sequencia;
+
+                if (feedbackDesafio) {
+                    feedbackDesafio.innerHTML = `<div class="badge-tom">🎉 Acertaste!</div><br>Excelente! ${desafioAtualObj.nome}`;
+                }
+                setTimeout(iniciarNovoDesafio, 1200);
+            } else {
+                sequencia = 0;
+                if (spanSequencia) spanSequencia.textContent = sequencia;
+                if (feedbackDesafio) {
+                    feedbackDesafio.innerHTML = `<div class="badge-tom">❌ Tenta de novo!</div><br>Incorreto para ${desafioAtualObj.nome}.`;
+                }
+                notasPressionadasPeloAluno = [];
+            }
+        }
+    }
 }
 
-// Suporte otimizado para clique e toque no telemóvel (pointerdown)
+// Eventos de clique e toque para as teclas (otimizado para PC e telemóvel)
 document.querySelectorAll('.tecla').forEach(tecla => {
     tecla.addEventListener('pointerdown', (e) => {
         e.preventDefault();
@@ -631,7 +702,7 @@ document.querySelectorAll('.tecla').forEach(tecla => {
 
 
 // ==========================================
-// 9. SUPORTE MIDI FÍSICO COM BUFFER DE ACORDES BLOCADOS
+// 10. SUPORTE MIDI FÍSICO
 // ==========================================
 const midiStatusEl = document.getElementById('midi-status');
 const mapaNotasMidi = {
@@ -655,7 +726,7 @@ function registrarNotaMidi(nota) {
             if (modoMusicaAtivo) {
                 mostrarTecladoAbaixoDe('secao-progressoes');
             } else {
-                mostrarTecladoAbaixoDe('secao-looper');
+                mostrarTecladoAbaixoDe('secao-quiz');
             }
             bufferMidiSimultaneo.forEach(n => processarNotaPressionada(n));
             bufferMidiSimultaneo = [];
@@ -694,22 +765,4 @@ function onMIDISuccess(midiAccess) {
             midiStatusEl.style.color = "#f59e0b";
         }
     }
-
-    midiAccess.onstatechange = (e) => {
-        if (e.port.type === "input") {
-            if (e.port.state === "connected") {
-                midiStatusEl.textContent = `🎹 MIDI: ${e.port.name}`;
-                midiStatusEl.style.color = "#22c55e";
-                e.port.onmidimessage = (msg) => {
-                    const [cmd, note, vel] = msg.data;
-                    if (cmd === 144 && vel > 0 && mapaNotasMidi[note]) {
-                        registrarNotaMidi(mapaNotasMidi[note]);
-                    }
-                };
-            } else {
-                midiStatusEl.textContent = "🔌 Teclado MIDI Desconectado.";
-                midiStatusEl.style.color = "#f59e0b";
-            }
-        }
-    };
 }
