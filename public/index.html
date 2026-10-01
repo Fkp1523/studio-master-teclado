@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treinamento de Teclado - Studio Master</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>🎹 Estúdio & Escola Virtual de Teclado</h1>
+    <p>Treino de Tríades, Inversões, Tetrádes (7ª), Nonas (9ª), Escalas e Progressões em Todos os Tons!</p>
+
+    <!-- Barra Superior: Timbres, Efeitos, Metrónomo & MIDI -->
+    <div class="painel-harmonia" style="margin-bottom: 5px; padding: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div>
+            <label for="timbre-select" style="display: inline; margin-right: 4px;">Timbre:</label>
+            <select id="timbre-select" style="padding: 4px 8px; width: auto;">
+                <option value="piano">Piano Elétrico (Warm)</option>
+                <option value="orgao">Órgão Gospel</option>
+                <option value="synth">Sintetizador Brilhante</option>
+            </select>
+        </div>
+
+        <div>
+            <label style="display: inline; margin-right: 4px;">Delay (Eco):</label>
+            <input type="checkbox" id="toggle-delay" style="cursor: pointer;">
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span id="metronome-beat" style="font-size: 1rem;">⚪</span>
+            <span style="font-size: 0.85rem;">BPM: <strong id="bpm-val">100</strong></span>
+            <input type="range" id="bpm-slider" min="60" max="180" value="100" style="width: 65px; cursor: pointer;">
+            <button id="btn-metronome" style="padding: 4px 8px; width: auto; background: linear-gradient(135deg, #10b981, #059669);">▶️</button>
+        </div>
+
+        <div id="midi-status" style="font-size: 0.8rem; color: #fbbf24; font-weight: 700;">
+            🔌 MIDI: A procurar...
+        </div>
+    </div>
+
+    <!-- Secção 1: Quiz Prático Completo -->
+    <div id="secao-quiz" class="painel-harmonia">
+        <h2>🎯 Treinamento Prático Completo</h2>
+        
+        <div id="placar" style="margin-bottom: 8px; font-size: 0.85rem; color: #38bdf8; font-weight: 700; text-align: center;">
+            Pontos: <span id="pontos">0</span> | Sequência: <span id="sequencia">0</span> 🔥 | Recorde: <span id="recorde">0</span> 🏆
+        </div>
+
+        <p id="desafio-texto" style="text-align: center; font-size: 0.95rem; margin-bottom: 8px;">Clica em "Iniciar Desafio" para sortear um acorde!</p>
+        
+        <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
+            <button id="btn-novo-desafio" style="flex: 2; min-width: 120px; background: linear-gradient(135deg, #10b981, #059669);">Iniciar Desafio</button>
+            <button id="btn-time-attack" style="flex: 1; min-width: 100px; background: linear-gradient(135deg, #ec4899, #be185d);">⚡ Time Attack</button>
+            <button id="btn-dica" style="flex: 1; min-width: 70px; background: linear-gradient(135deg, #f59e0b, #d97706);">💡 Dica</button>
+            <button id="btn-reiniciar" style="flex: 1; min-width: 70px; background: linear-gradient(135deg, #64748b, #475569);">Reiniciar</button>
+        </div>
+
+        <div id="feedback-desafio">Aguardando início...</div>
+    </div>
+
+    <!-- Secção 2: Gerador de Campo Harmónico e Treino de Escala -->
+    <div id="secao-campo" class="painel-harmonia">
+        <h2>📐 Gerador de Campo Harmónico & Treino de Escalas</h2>
+        <label for="tonalidade">Escolhe a Tonalidade:</label>
+        <select id="tonalidade" style="width: 100%;">
+            <option value="C">Dó Maior (C)</option>
+            <option value="C#">Dó# Maior (C#)</option>
+            <option value="D">Ré Maior (D)</option>
+            <option value="D#">Ré# Maior (D#)</option>
+            <option value="E">Mi Maior (E)</option>
+            <option value="F">Fá Maior (F)</option>
+            <option value="F#">Fá# Maior (F#)</option>
+            <option value="G">Sol Maior (G)</option>
+            <option value="G#">Sol# Maior (G#)</option>
+            <option value="A">Lá Maior (A)</option>
+            <option value="A#">Lá# Maior (A#)</option>
+            <option value="B">Si Maior (B)</option>
+        </select>
+        <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
+            <button id="btn-gerar" style="flex: 1; min-width: 130px; background: linear-gradient(135deg, #0ea5e9, #0284c7);">Gerar Campo</button>
+            <button id="btn-treinar-escala" style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #8b5cf6, #6d28d9);">🎹 Treinar Escala</button>
+            <button id="btn-reiniciar-escala" style="flex: 1; min-width: 90px; background: linear-gradient(135deg, #64748b, #475569);">🔄 Reiniciar</button>
+        </div>
+        <div id="resultado-harmonia">Seleciona um tom acima.</div>
+    </div>
+
+    <!-- Secção 3: Modo Música (Com Seletor de Tom Dinâmico) -->
+    <div id="secao-progressoes" class="painel-harmonia">
+        <h2>🎼 Modo Música: Progressões Transponíveis em Todos os Tons</h2>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 8px;">
+            <div style="flex: 2;">
+                <label for="progressao-select">Escolhe a Progressão (Graus):</label>
+                <select id="progressao-select" style="width: 100%;">
+                    <option value="pop">Pop Ballad (I - vi - IV - V)</option>
+                    <option value="praise_4">Praise / Pop Moderno (I - V - vi - IV)</option>
+                    <option value="gospel_worship">Gospel Worship (I - IV - vi - V)</option>
+                    <option value="sertanejo">Sertanejo Cadência (I - V - IV - V)</option>
+                    <option value="pop_50s">Doo-Wop 50s / Anos 60 (I - vi - ii - V)</option>
+                    <option value="bossa">Bossa Nova / MPB (ii7 - V7 - I7M)</option>
+                    <option value="neosoul">Neo-Soul / R&B Moderno (vi7 - V7 - IV7M)</option>
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label for="tom-progressao">Tom:</label>
+                <select id="tom-progressao" style="width: 100%;">
+                    <option value="C">C (Dó)</option>
+                    <option value="C#">C# (Dó#)</option>
+                    <option value="D">D (Ré)</option>
+                    <option value="D#">D# (Ré#)</option>
+                    <option value="E">E (Mi)</option>
+                    <option value="F">F (Fá)</option>
+                    <option value="F#">F# (Fá#)</option>
+                    <option value="G">G (Sol)</option>
+                    <option value="G#">G# (Sol#)</option>
+                    <option value="A">A (Lá)</option>
+                    <option value="A#">A# (Lá#)</option>
+                    <option value="B">B (Si)</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 6px; margin-top: 6px;">
+            <button id="btn-iniciar-prog" style="width: 100%; background: linear-gradient(135deg, #6366f1, #4f46e5);">Iniciar Progressão</button>
+        </div>
+        <div id="resultado-progressao">
+            Escolhe o tom e a progressão acima e clica em iniciar.
+        </div>
+    </div>
+
+    <!-- Secção 4: Looper -->
+    <div id="secao-looper" class="painel-harmonia">
+        <h2>🎙️ Looper de Gravação (Autoavaliação)</h2>
+        <p style="font-size: 0.85rem; margin-bottom: 6px;">Grava a tua execução no teclado e ouve em ciclo.</p>
+        <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
+            <button id="btn-rec" style="background: linear-gradient(135deg, #ef4444, #991b1b);">🔴 Gravar</button>
+            <button id="btn-play-loop" style="background: linear-gradient(135deg, #10b981, #047857);">▶ Reproduzir Loop</button>
+            <button id="btn-stop-loop" style="background: linear-gradient(135deg, #64748b, #475569);">⏹ Parar</button>
+        </div>
+        <div id="looper-status" style="margin-top: 6px; text-align: center; color: #94a3b8; font-size: 0.8rem;">Estado do Looper: Parado</div>
+    </div>
+
+    <!-- CONTAINER ÚNICO E INTEGRADO: PAUTA + TECLADO VERMELHO (MÓVEL VIA JS) -->
+    <div id="estudio-interativo" class="estudio-interativo-container oculto">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 0.8rem; font-weight: 800; color: #fef08a;">🔴 PAUTA E TECLADO ATIVOS</span>
+            <button id="btn-fechar-teclado" style="background: #ef4444; color: white; padding: 3px 8px; font-size: 0.75rem; margin: 0; border-radius: 5px;">✕ Fechar</button>
+        </div>
+
+        <!-- Pauta Musical -->
+        <div style="text-align: center; margin-bottom: 8px;">
+            <canvas id="sheet-staff" width="560" height="75" style="background: #0f172a; border-radius: 8px; border: 1px solid #475569; max-width: 100%;"></canvas>
+        </div>
+
+        <!-- Teclado Virtual Vermelho -->
+        <div class="teclado-wrapper">
+            <div class="teclado">
+                <!-- Oitava 4 -->
+                <div class="tecla branca" data-nota="C4">C4</div>
+                <div class="tecla preta" data-nota="C#4"></div>
+                <div class="tecla branca" data-nota="D4">D4</div>
+                <div class="tecla preta" data-nota="D#4"></div>
+                <div class="tecla branca" data-nota="E4">E4</div>
+                <div class="tecla branca" data-nota="F4">F4</div>
+                <div class="tecla preta" data-nota="F#4"></div>
+                <div class="tecla branca" data-nota="G4">G4</div>
+                <div class="tecla preta" data-nota="G#4"></div>
+                <div class="tecla branca" data-nota="A4">A4</div>
+                <div class="tecla preta" data-nota="A#4"></div>
+                <div class="tecla branca" data-nota="B4">B4</div>
+                <!-- Oitava 5 -->
+                <div class="tecla branca" data-nota="C5">C5</div>
+                <div class="tecla preta" data-nota="C#5"></div>
+                <div class="tecla branca" data-nota="D5">D5</div>
+                <div class="tecla preta" data-nota="D#5"></div>
+                <div class="tecla branca" data-nota="E5">E5</div>
+                <div class="tecla branca" data-nota="F5">F5</div>
+                <div class="tecla preta" data-nota="F#5"></div>
+                <div class="tecla branca" data-nota="G5">G5</div>
+                <div class="tecla preta" data-nota="G#5"></div>
+                <div class="tecla branca" data-nota="A5">A5</div>
+                <div class="tecla preta" data-nota="A#5"></div>
+                <div class="tecla branca" data-nota="B5">B5</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/script.js"></script>
+</body>
+</html>
